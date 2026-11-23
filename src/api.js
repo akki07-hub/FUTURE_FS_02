@@ -10,7 +10,7 @@ async function request(path, options = {}) {
       ...options,
     });
   } catch {
-    throw new Error("Can't reach the server. It may be waking up, so try again in a moment.");
+    throw new Error("Can't reach the server. Check your connection and try again.");
   }
 
   const data = await res.json().catch(() => ({}));

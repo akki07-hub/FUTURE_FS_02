@@ -5,14 +5,13 @@ A lead-management CRM for small teams. Add leads, move each one through
 counts and a pie chart.
 
 **Live demo:** https://akki07-hub.github.io/FUTURE_FS_02/
-(The free API server sleeps when idle, so the first load can take up to a minute.)
 
 ## Tech stack
 
 | Part | Technology |
 |---|---|
 | Frontend | React 19, Vite, Recharts — hosted on GitHub Pages |
-| Backend | Node.js, Express 5 — hosted on Render |
+| Backend | Node.js, Express 5 — Vercel serverless function |
 | Database | MongoDB Atlas with Mongoose |
 
 ## API
@@ -44,9 +43,12 @@ npm run dev                  # http://localhost:5173/FUTURE_FS_02/
 
 ## Deploy
 
-- **API:** create a Render web service from this repo using `render.yaml`
-  (root directory `server`) and set `MONGODB_URI`.
-- **Frontend:** build with `VITE_API_URL=<your Render URL> npm run build`
-  and publish `dist/` to the `gh-pages` branch.
+**API (Vercel)**
+1. Import this repo in Vercel and set **Root Directory** to `server`.
+2. Add the environment variable `MONGODB_URI` (your MongoDB Atlas connection string).
+3. Deploy. `server/vercel.json` routes every request to `server/api/index.js`.
+
+**Frontend (GitHub Pages)**
+Build with `VITE_API_URL=<your Vercel URL> npm run build` and publish `dist/` to the `gh-pages` branch.
 
 Built during the Future Interns Full Stack Web Development internship.

@@ -130,7 +130,7 @@ export default function App() {
         )}
         {isLoading && !message && (
           <p className="status-message" role="status">
-            Loading leads… The free server can take up to a minute to wake up.
+            Loading leads…
           </p>
         )}
 
