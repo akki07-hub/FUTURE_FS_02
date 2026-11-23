@@ -1,16 +1,52 @@
-# React + Vite
+# Mini CRM
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lead-management CRM for small teams. Add leads, move each one through
+**New → Contacted → Converted**, and track the pipeline on a dashboard with live
+counts and a pie chart.
 
-Currently, two official plugins are available:
+**Live demo:** https://akki07-hub.github.io/FUTURE_FS_02/
+(The free API server sleeps when idle, so the first load can take up to a minute.)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Tech stack
 
-## React Compiler
+| Part | Technology |
+|---|---|
+| Frontend | React 19, Vite, Recharts — hosted on GitHub Pages |
+| Backend | Node.js, Express 5 — hosted on Render |
+| Database | MongoDB Atlas with Mongoose |
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## API
 
-## Expanding the ESLint configuration
+| Method | Path | Body | Description |
+|---|---|---|---|
+| GET | `/api/health` | – | Server and database status |
+| GET | `/api/leads` | – | All leads, newest first |
+| POST | `/api/leads` | `{ name, email }` | Create a lead (status `new`) |
+| PATCH | `/api/leads/:id/status` | `{ status }` | `new`, `contacted` or `converted` |
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Inputs are validated on the server, and CORS only allows this site and local development.
+An empty database is seeded with 5 sample leads on first start.
+
+## Run locally
+
+```bash
+# 1. API
+cd server
+cp .env.example .env        # then put your MongoDB connection string in .env
+npm install
+npm run dev                  # http://localhost:5000
+
+# 2. Frontend (in another terminal, from the project root)
+cp .env.example .env         # VITE_API_URL=http://localhost:5000
+npm install
+npm run dev                  # http://localhost:5173/FUTURE_FS_02/
+```
+
+## Deploy
+
+- **API:** create a Render web service from this repo using `render.yaml`
+  (root directory `server`) and set `MONGODB_URI`.
+- **Frontend:** build with `VITE_API_URL=<your Render URL> npm run build`
+  and publish `dist/` to the `gh-pages` branch.
+
+Built during the Future Interns Full Stack Web Development internship.

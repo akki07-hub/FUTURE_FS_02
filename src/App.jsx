@@ -7,7 +7,7 @@ import {
   Tooltip,
 } from "recharts";
 import "./App.css";
-import { supabase } from "./supabase";
+import { api } from "./api";
 
 const STATUS_FLOW = {
   new: "contacted",
@@ -24,23 +24,22 @@ export default function App() {
   const [page, setPage] = useState("dashboard");
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     fetchLeads();
   }, []);
 
   async function fetchLeads() {
-    const { data, error } = await supabase
-      .from("leads")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error) {
-      setMessage("Unable to load leads. Check your Supabase table settings.");
-      return;
+    try {
+      const data = await api.listLeads();
+      setLeads(Array.isArray(data) ? data : []);
+      setMessage("");
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setIsLoading(false);
     }
-
-    setLeads(data || []);
   }
 
   async function addLead(event) {
@@ -54,19 +53,13 @@ export default function App() {
     setIsSaving(true);
     setMessage("");
 
-    const { error } = await supabase.from("leads").insert([
-      {
-        name: name.trim(),
-        email: email.trim(),
-        status: "new",
-      },
-    ]);
-
-    setIsSaving(false);
-
-    if (error) {
-      setMessage("Lead was not saved. Please try again.");
+    try {
+      await api.addLead({ name: name.trim(), email: email.trim() });
+    } catch (err) {
+      setMessage(`Lead was not saved. ${err.message}`);
       return;
+    } finally {
+      setIsSaving(false);
     }
 
     setName("");
@@ -76,17 +69,12 @@ export default function App() {
   }
 
   async function updateStatus(id, current) {
-    const { error } = await supabase
-      .from("leads")
-      .update({ status: STATUS_FLOW[current] || "new" })
-      .eq("id", id);
-
-    if (error) {
-      setMessage("Status was not updated. Please try again.");
-      return;
+    try {
+      const updated = await api.updateStatus(id, STATUS_FLOW[current] || "new");
+      setLeads((prev) => prev.map((lead) => (lead.id === id ? updated : lead)));
+    } catch (err) {
+      setMessage(`Status was not updated. ${err.message}`);
     }
-
-    fetchLeads();
   }
 
   const stats = useMemo(() => {
@@ -130,16 +118,21 @@ export default function App() {
             <h2>{page[0].toUpperCase() + page.slice(1)}</h2>
           </div>
 
-          <button
-            className="logout-btn"
-            onClick={() => supabase.auth.signOut()}
-            type="button"
-          >
-            Logout
+          <button className="logout-btn" onClick={fetchLeads} type="button">
+            Refresh
           </button>
         </header>
 
-        {message && <p className="status-message">{message}</p>}
+        {message && (
+          <p className="status-message" role="alert">
+            {message}
+          </p>
+        )}
+        {isLoading && !message && (
+          <p className="status-message" role="status">
+            Loading leads… The free server can take up to a minute to wake up.
+          </p>
+        )}
 
         {(page === "dashboard" || page === "analytics") && (
           <section className="stats-grid" aria-label="Lead statistics">
@@ -205,7 +198,7 @@ export default function App() {
               />
 
               <button className="primary-btn" disabled={isSaving} type="submit">
-                {isSaving ? "Adding..." : "Add"}
+                {isSaving ? "Adding…" : "Add"}
               </button>
             </form>
           </section>

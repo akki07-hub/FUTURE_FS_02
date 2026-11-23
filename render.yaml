@@ -1,0 +1,15 @@
+# Render Blueprint for the Mini CRM API (Express + MongoDB)
+services:
+  - type: web
+    name: mini-crm-api
+    runtime: node
+    plan: free
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: MONGODB_URI
+        sync: false   # paste your MongoDB Atlas connection string in the Render dashboard
+      - key: ALLOWED_ORIGINS
+        value: https://akki07-hub.github.io,http://localhost:5173
