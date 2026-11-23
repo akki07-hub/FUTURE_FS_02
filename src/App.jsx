@@ -68,6 +68,12 @@ export default function App() {
     fetchLeads();
   }
 
+  async function resetDemo() {
+    if (!window.confirm("Reset the demo? Your leads will be replaced with the sample leads.")) return;
+    setLeads(await api.resetDemo());
+    setMessage("");
+  }
+
   async function updateStatus(id, current) {
     try {
       const updated = await api.updateStatus(id, STATUS_FLOW[current] || "new");
@@ -114,12 +120,12 @@ export default function App() {
       <main className="main-panel">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Lead Workspace</p>
+            <p className="eyebrow">Lead Workspace &middot; saved in this browser</p>
             <h2>{page[0].toUpperCase() + page.slice(1)}</h2>
           </div>
 
-          <button className="logout-btn" onClick={fetchLeads} type="button">
-            Refresh
+          <button className="logout-btn" onClick={resetDemo} type="button">
+            Reset Demo
           </button>
         </header>
 
